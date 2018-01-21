@@ -1,7 +1,7 @@
 <template lang="pug">
   #app
     app-header(
-      @seleccionado="estaSeleccionadoClase"
+      :opcion="opcionAPP"
       @cambiar-app="cambiarAPP"
     )
     router-view
@@ -25,11 +25,6 @@ export default {
   methods: {
     cambiarAPP (opts) {
       this.opcionAPP = opts
-    },
-    estaSeleccionadoClase (opts) {
-      if (this.opcionAPP === opts) {
-        return 'esta-activo'
-      }
     }
   }
 }
@@ -94,6 +89,17 @@ ul{
   }
   .esta-activo{
     color: #f6dea7;
+  }
+}
+@media (max-width: 534px){
+  body{
+    font-size: 12.8px;
+  }
+}
+
+@media (max-width: 300px){
+  body{
+    font-size: 10px;
   }
 }
 </style>

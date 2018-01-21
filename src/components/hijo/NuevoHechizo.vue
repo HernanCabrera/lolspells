@@ -1,49 +1,30 @@
 <template lang="pug">
   transition(name="move")
-    main(v-if="obj.agregarActivo" class="overlay")
+    main(class="overlay")
       .modal
-        h1.titulo Nuevo Tiempo!
+        h1.titulo Nuevo hechizo!
         .modal-buttons
-          //- span Horas
-          input(
-            type="number" 
-            v-model="obj.nuevoTiempo.hora"
-            min="0"
-            max="23"
-            placeholder="horas"
-          )
-          //- span Minutos
-          input(
-            type="number" 
-            v-model="obj.nuevoTiempo.minuto"
-            min="0"
-            max="59"
-            placeholder="minutos"
-          )
-          //- span Segundos
-          input(
-            type="number" 
-            v-model="obj.nuevoTiempo.segundo"
-            min="0"
-            max="59"
-            placeholder="segundos"
-          )
-        button(class="btn agregar" @click="agregarALista") AGREGAR
-        button(class="btn cancelar" @click="cancelarModal") CANCELAR
+          div(v-for="t in array")
+            div(v-if="!t.estaAgregado")
+              div
+                select(v-model="t.id")
+                  option(disabled value="") Todos los hechizos
+                  option(v-for="(h, indice) in hechizos"  :value="h.id") {{ h.nombre }}
+        button(class="btn agregar") AGREGAR
+        button(class="btn cancelar") CANCELAR
 </template>
 
 <script>
 export default{
   props: {
-    obj: { type: Object, required: true }
   },
   methods: {
-    cancelarModal () {
-      this.$emit('cancelar', this.obj)
-    },
-    agregarALista () {
-      this.$emit('agregar', this.obj)
-    }
+    // cancelarModal () {
+    //   this.$emit('cancelar', this.obj)
+    // },
+    // agregarALista () {
+    //   this.$emit('agregar', this.obj)
+    // }
   }
 }
 </script>

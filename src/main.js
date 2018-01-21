@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import App from './App'
 
 import routes from './routes'
-
 // import AppTiempo from './components/global/Tiempo'
 // import AppBotones from './components/global/Botones'
 // import AppListaDeTiempos from './components/global/ListaDeTiempos'
@@ -11,6 +10,7 @@ import routes from './routes'
 import store from './store'
 
 Vue.use(VueRouter)
+
 // Vue.component('AppTiempo', AppTiempo)
 // Vue.component('AppBotones', AppBotones)
 // Vue.component('AppListaDeTiempos', AppListaDeTiempos)
