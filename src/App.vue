@@ -2,7 +2,9 @@
   #app
     app-header(
       :opcion="opcionAPP"
+      :full="estaFullScreen"
       @cambiar-app="cambiarAPP"
+      @full="cambiarFullScreen"
     )
     router-view
 
@@ -17,6 +19,7 @@ export default {
   components: { AppHeader },
   data () {
     return {
+      estaFullScreen: false
     }
   },
   computed: {
@@ -25,6 +28,19 @@ export default {
   methods: {
     cambiarAPP (opts) {
       this.opcionAPP = opts
+    },
+    cambiarFullScreen () {
+      const doc = window.document
+      const docEl = doc.documentElement
+      const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen
+      const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen
+      if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+        this.estaFullScreen = true
+        requestFullScreen.call(docEl)
+      } else {
+        this.estaFullScreen = false
+        cancelFullScreen.call(doc)
+      }
     }
   }
 }
@@ -43,6 +59,11 @@ body{
 }
 ul{
   list-style: none;
+}
+button{
+  background: none;
+  border: 0;
+  color: #a6a5a7;
 }
 .fondo{
   position: fixed;

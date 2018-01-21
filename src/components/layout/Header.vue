@@ -9,6 +9,10 @@
         :class="{ 'esta-activo': opcion === 1 }"
         to="/"
       )
+      button.item.icon-plus(
+        @click="cambiar()"
+        :class="{ 'icon-minus': full === true }"
+      )
       //- router-link.item.icon-leaf(
       //-   @click="cambiarAPP(2)"
       //-   :class="{ 'esta-activo': opcion === 2 }"
@@ -29,16 +33,20 @@
 <script>
 export default{
   props: {
-    opcion: { type: Number, required: true }
+    opcion: { type: Number, required: true },
+    full: { type: Boolean, required: true }
   },
   methods: {
     cambiarAPP (opts) {
       this.$emit('cambiar-app', opts)
+    },
+    cambiar () {
+      this.$emit('full')
     }
   }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 </style>
