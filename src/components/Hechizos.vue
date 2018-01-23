@@ -13,29 +13,31 @@
           .contenedor-img 
             img.img-campeon(:src="l.img" @click="eliminarDeLaLista(indiceL, l.listaDeTiempos)")
             //- span.nombre-campeon {{ l.nombre }}
-          
+          .contenedor-img-rde
+            img.img-rde.botas(
+              src="src/assets/rde/botas.png"
+              @click="activarDesactivarRDE(1, l)"
+              :class="{ 'esta-prendido': l.RDE1Activo === false }"
+            )
+            img.img-rde.runas(
+              src="src/assets/rde/runas.png"
+              @click="activarDesactivarRDE(2, l)"
+              :class="{ 'esta-prendido': l.RDE2Activo === false }"
+            )
           ul.contenedor-lista-de-hechizos
             li.hechizo(v-for="(t, indiceT) in l.listaDeTiempos")
               .contenedor-entrada-secundaria(v-if="!t.estaAgregado")
                 .contenedor-efecto
-                  button.btn-agregar-hechizo(@click="activarModal(t)") NUEVO 
+                  button.btn-agregar-hechizo(@click="activarModal(t)") HECHIZO 
                     span.icon-plus
               transition(name="move-modal")
                 main(class="overlay" v-if="t.modalActivo")
                   .modal
-                    h1.titulo Nuevo hechizo!
+                    h1.titulo Agregar nuevo hechizo!
                     .modal-buttons
                       select.seleccion-hechizo(v-model="t.id")
                         option.opcion-hechizo(disabled value="") Todos los hechizos
                         option.opcion-hechizo(v-for="(h, indice) in hechizos"  :value="h.id") {{ h.nombre }}
-                      
-                      .entrada-check
-                        .opcion-1
-                          input.check(type="checkbox" id="botas" value="10" v-model="RDE")
-                          label.label(for="botas") Botas Jonias
-                        .opcion-2
-                          input.check(type="checkbox" id="runas" value="5" v-model="RDE")
-                          label.label(for="runas") Percepción Cósmica
                     button(class="btn agregar" @click="agregarHechizo(t, indiceL, l, RDE)") AGREGAR
                     button(class="btn cancelar" @click="cancelarModal(t)") CANCELAR
 
@@ -44,7 +46,7 @@
                 .contenedor-img
                   img.img-hechizo(
                     :src="t.img"
-                    @click="iniciarTemporizador(t)"
+                    @click="iniciarTemporizador(t, l)"
                     :class="{ 'esta-prendido': t.estaPrendido === true }"
                   )
                   span.duracion-hechizo(
@@ -113,6 +115,8 @@ export default {
         const nuevoObj = {
           nombre: campeonSeleccionado,
           img: this.devolverRuta(campeonSeleccionado, 1),
+          RDE1Activo: false,
+          RDE2Activo: false,
           listaDeTiempos: [
             {
               id: '', estaPrendido: false, estaAgregado: false, duracion: 0, img: null, intervalo: null, DOM: '', modalActivo: false, RDE: 0
@@ -134,13 +138,6 @@ export default {
           t.estaAgregado = true
           t.img = this.devolverRuta(this.hechizos[t.id - 1].nombre, 2)
           t.duracion = this.hechizos[t.id - 1].duracion
-          console.log(RDE)
-          if (RDE.length !== 0 && RDE !== undefined) {
-            console.log('entro')
-            t.RDE = RDE.reduce((acum, numero) => acum += parseInt(numero), 0)
-            t.duracion = t.duracion - (t.duracion * t.RDE / 100)
-            this.RDE = []
-          }
           this.cancelarModal(t)
         } else {
           t.DOM = ''
@@ -163,12 +160,19 @@ export default {
     cambiarEstado (t) {
       t.estaPrendido = !t.estaPrendido
     },
-    iniciarTemporizador (t) {
+    iniciarTemporizador (t, l) {
       this.cambiarEstado(t)
       const dom = document.getElementById(t.DOM)
       dom.play()
       dom.pause()
       if (t.estaPrendido) {
+        if (l.RDE1Activo) {
+          t.RDE += 10
+        }
+        if (l.RDE2Activo) {
+          t.RDE += 5
+        }
+        t.duracion = t.duracion - (t.duracion * t.RDE / 100)
         t.intervalo = setInterval(() => {
           if (t.duracion <= 0) {
             dom.currentTime = 0
@@ -183,6 +187,7 @@ export default {
       } else {
         t.estaPrendido = false
         t.duracion = this.hechizos[t.id - 1].duracion
+        t.RDE = 0
         clearInterval(t.intervalo)
       }
     },
@@ -209,14 +214,22 @@ export default {
       t.estaAgregado = false
       t.img = null
       t.DOM = ''
-      t.RDE = []
+      t.RDE = 0
       t.modalActivo = false
+      t.duracion = 0
     },
     activarModal (t) {
       t.modalActivo = true
     },
     cancelarModal (t) {
       t.modalActivo = false
+    },
+    activarDesactivarRDE (opts, l) {
+      if (opts === 1) {
+        l.RDE1Activo = !l.RDE1Activo
+      } else {
+        l.RDE2Activo = !l.RDE2Activo
+      }
     }
   },
   filters: {
@@ -234,19 +247,20 @@ export default {
 <style lang="scss">
 .contenedor-entrada-principal{
   text-align: center;
-  margin: 5% auto;
+  margin: 20px auto;
   .texto-campeon{
     color: #a6a5a7;
     letter-spacing: 2px;
-    padding: 3% 0;
+    padding: 20px 0;
     font-size: 2.5em;
     font-weight: 700;
   }
   .seleccion-campeon{
     display: inline-block;
     margin: 0 auto;
-    width: 80%;
-    padding: 2% 0;
+    width: 90%;
+    padding: 3% 0;
+    font-weight: 700;
     font-size: 1.7em;
     border-radius: 5px;
     background: none;
@@ -266,10 +280,10 @@ export default {
   }
   .btn-agregar-campeon{
     display: inline-block;
-    width: 80%;
-    padding: 2% 0;
+    width: 90%;
+    padding: 3% 0;
     margin-top: 2%;
-    font-size: 1.5em;
+    font-size: 1.8em;
     letter-spacing: 2px;
     border-radius: 5px;
     background: none;
@@ -285,7 +299,7 @@ export default {
   }
 }
 .contenedor-lista-de-campeones{
-  margin: 8% auto;
+  margin: 40px auto;
   .campeon{
     border-radius: 75px;
     background: rgba(0,0,0,.3);
@@ -304,6 +318,25 @@ export default {
       }
       .nombre-campeon{
         color: #a6a5a7;
+      }
+    }
+    .contenedor-img-rde{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      width: 10%;
+      .img-rde{
+        max-width: 90%;
+        min-width: 34px;
+        margin: 10% 0;
+        cursor: pointer;
+      }
+      .botas{
+
+      }
+      .runas{
+
       }
     }
     .contenedor-lista-de-hechizos{
@@ -372,10 +405,13 @@ export default {
             align-items: center;
             justify-content: center;
             flex-direction: column;
+            width: 100%;
             .img-hechizo{
               cursor: pointer;
               border: 1px solid #a6a5a7;
               border-radius: 2px;
+              max-width: 50%;
+              min-width: 46px;
             }
             .duracion-hechizo{
               cursor: pointer;
@@ -467,24 +503,6 @@ export default {
         .opcion-hechizo{
         }
       }
-      .entrada-check{
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 80%;
-        margin: 4% auto;
-
-        .opcion-1, .opcion-2{
-          display: block;
-          font-size: 1.5em;
-        }
-        .check{
-          display: inline-block;
-        }
-        .label{
-          display: inline-block;
-        }
-      }
     }
     .btn{
       text-align: center;
@@ -537,7 +555,14 @@ export default {
   75% { transform: translateY(25px); }
   100% { transform: translateY(-3000px); }
 }
-
+@media (max-width: 710px){
+  .contenedor-entrada-principal{
+    margin: 5% auto;
+    .texto-campeon{
+      padding: 3% 0;
+    }
+  }
+}
 @media (max-width: 335px){
   body{
     font-size: 12.8px;
@@ -548,19 +573,12 @@ export default {
     }
   }
   .contenedor-lista-de-campeones{
-    .campeon{
-      border-radius: 75px 50px 0 75px;
-    }
+    margin: 8% auto;
   }
 }
 @media (max-width: 335px){
   body{
     font-size: 10px;
-  }
-  .contenedor-lista-de-campeones{
-    .campeon{
-      border-radius: 75px 50px 0 75px;
-    }
   }
 }
 </style>
