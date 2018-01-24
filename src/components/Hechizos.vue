@@ -1,12 +1,10 @@
 <template lang="pug">
   main
-    .contenedor-entrada-principal.contenedor
-      h2.texto-campeon CAMPEONES
-      select.seleccion-campeon(v-model="campeonSeleccionado")
-        option.opcion-campeon(disabled value="") Todos los campeones
-        option.opcion-campeon(v-for="(c, indice) in campeones"  :value="c") {{ c }}
-      button.btn-agregar-campeon(@click="agregarALaLista(campeonSeleccionado)") AGREGAR
-      
+    app-select-champ(
+      :campeones="campeones",
+      :campeonSeleccionado="campeonSeleccionado"
+      @agregar="agregarALaLista"
+    )
     ul.contenedor-lista-de-campeones.contenedor
       transition-group(name="move-campeon" tag="p")
         li.campeon(v-for="(l, indiceL) in listaDeCampeonesSelec"  :key="l.img")
@@ -64,13 +62,17 @@
  
 <script>
 import AppNuevoHechizo from './hijo/NuevoHechizo'
+import AppSelectChamp from './hijo/SelectChamp'
 import { mapState } from 'vuex'
 export default {
-  components: { AppNuevoHechizo },
+  components: { AppNuevoHechizo, AppSelectChamp },
   data () {
     return {
+      seleccionado: '',
       RDE: [],
-      campeonSeleccionado: '',
+      campeonSeleccionado: {
+        nombre: ''
+      },
       listaDeCampeonesSelec: [],
       campeones: [
         'Aatrox', 'Ahri', 'Akali', 'Alistar', 'Amumu', 'Anivia', 'Annie', 'Ashe', 'Aurelion Sol', 'Azir', 'Bardo', 'Blitzcrank', 'Brand', 'Braum', 'Caitlyn', 'Camille', 'Cassiopeia', "Cho'Gath", 'Corki', 'Darius', 'Diana', 'Dr. Mundo', 'Draven', 'Ekko', 'Elise', 'Evelynn', 'Ezreal', 'Fiddlesticks', 'Fiora', 'Fizz', 'Galio', 'Gangplank', 'Garen', 'Gnar', 'Gragas', 'Graves', 'Hecarim', 'Heimerdinger', 'Illaoi', 'Irelia', 'Ivern', 'Janna', 'Jarvan IV', 'Jax', 'Jayce', 'Jhin', 'Jinx', 'Kalista', 'Karma', 'Karthus', 'Kassadin', 'Katarina', 'Kayle', 'Kayn', 'Kennen', "Kha'Zix", 'Kindred', 'Kled', "Kog'Maw", 'Le Blanc', 'Lee Sin', 'Leona', 'Lissandra', 'Lucian', 'Lulu', 'Lux', 'Maestro Yi', 'Malphite', 'Malzahar', 'Maokai', 'Miss Fortune', 'Mordekaiser', 'Morgana', 'Nami', 'Nasus', 'Nautilus', 'Nidalee', 'Nocturne', 'Nunu', 'Olaf', 'Orianna', 'Ornn', 'Pantheon', 'Poppy', 'Quinn', 'Rakan', 'Rammus', "Rek'Sai", 'Renekton', 'Rengar', 'Riven', 'Rumble', 'Ryze', 'Sejuani', 'Shaco', 'Shen', 'Shyvana', 'Singed', 'Sion', 'Sivir', 'Skarner', 'Sona', 'Soraka', 'Swain', 'Syndra', 'Tahm Kench', 'Taliyah', 'Talon', 'Taric', 'Teemo', 'Thresh', 'Tristana', 'Trundle', 'Tryndamere', 'Twisted Fate', 'Twitch', 'Udyr', 'Urgot', 'Varus', 'Vayne', 'Veigar', 'Velkoz', 'Vi', 'Viktor', 'Vladimir', 'Volibear', 'Warwick', 'Wukong', 'Xayah', 'Xerath', 'Xin Zhao', 'Yasuo', 'Yorick', 'Zac', 'Zed', 'Ziggs', 'Zilean', 'Zoe', 'Zyra'
@@ -111,10 +113,10 @@ export default {
       }
     },
     agregarALaLista (campeonSeleccionado) {
-      if (this.campeonSeleccionado !== '' && !this.existeEnLaLista(campeonSeleccionado)) {
+      if (campeonSeleccionado.nombre !== '' && !this.existeEnLaLista(campeonSeleccionado.nombre)) {
         const nuevoObj = {
-          nombre: campeonSeleccionado,
-          img: this.devolverRuta(campeonSeleccionado, 1),
+          nombre: campeonSeleccionado.nombre,
+          img: this.devolverRuta(campeonSeleccionado.nombre, 1),
           RDE1Activo: false,
           RDE2Activo: false,
           listaDeTiempos: [
@@ -127,7 +129,7 @@ export default {
           ]
         }
         this.listaDeCampeonesSelec.push(nuevoObj)
-        this.campeonSeleccionado = ''
+        campeonSeleccionado.nombre = ''
       }
     },
     agregarHechizo (t, indiceL, l, RDE) {
@@ -245,59 +247,6 @@ export default {
 </script>
 
 <style lang="scss">
-.contenedor-entrada-principal{
-  text-align: center;
-  margin: 20px auto;
-  .texto-campeon{
-    color: #a6a5a7;
-    letter-spacing: 2px;
-    padding: 20px 0;
-    font-size: 2.5em;
-    font-weight: 700;
-  }
-  .seleccion-campeon{
-    display: inline-block;
-    margin: 0 auto;
-    width: 90%;
-    padding: 3% 0;
-    font-weight: 700;
-    font-size: 1.7em;
-    border-radius: 5px;
-    background: none;
-    color: #a6a5a7;
-    transition: .5s;
-    padding-left: 2%;
-    .opcion-campeon{
-      color: #212529;
-    }
-    &:hover{
-      border: 1px solid #fff;
-      color: #fff;
-    }
-  }
-  .seleccion-campeon:focus{
-    border: 1px solid #f6dea7;
-  }
-  .btn-agregar-campeon{
-    display: inline-block;
-    width: 90%;
-    padding: 3% 0;
-    margin-top: 2%;
-    font-size: 1.8em;
-    letter-spacing: 2px;
-    border-radius: 5px;
-    background: none;
-    border: 1px solid #f6dea7;
-    color: #f6dea7;
-    transition: .5s;
-    cursor: pointer;
-    font-weight: 700;
-    &:hover{
-      background: #f6dea7;
-      color: #212529;
-    }
-  }
-}
 .contenedor-lista-de-campeones{
   margin: 40px auto;
   .campeon{
@@ -555,27 +504,17 @@ export default {
   75% { transform: translateY(25px); }
   100% { transform: translateY(-3000px); }
 }
-@media (max-width: 710px){
-  .contenedor-entrada-principal{
-    margin: 5% auto;
-    .texto-campeon{
-      padding: 3% 0;
-    }
-  }
-}
+
+
 @media (max-width: 335px){
   body{
     font-size: 12.8px;
-  }
-  .contenedor-entrada-principal{
-    .texto-campeon{
-      letter-spacing: 0;
-    }
   }
   .contenedor-lista-de-campeones{
     margin: 8% auto;
   }
 }
+
 @media (max-width: 335px){
   body{
     font-size: 10px;
