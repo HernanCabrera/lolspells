@@ -5,6 +5,10 @@
       :campeonSeleccionado="campeonSeleccionado"
       @agregar="agregarALaLista"
     )
+    .contenedor.contenedor-opciones-globales 
+      h2.titulo(@click="habilitarOpciones(opcionesGlobales)") Opciones globales
+      button.btn-agregar-destello(v-show="opcionesGlobales.destello === true" @click="destelloATodos(listaDeCampeonesSelec)") - Destello a todos
+        .icon-plus
     ul.contenedor-lista-de-campeones.contenedor
       transition-group(name="move-campeon" tag="p")
         li.campeon(v-for="(l, indiceL) in listaDeCampeonesSelec"  :key="l.img")
@@ -36,7 +40,7 @@
                       select.seleccion-hechizo(v-model="t.id")
                         option.opcion-hechizo(disabled value="") Todos los hechizos
                         option.opcion-hechizo(v-for="(h, indice) in hechizos"  :value="h.id") {{ h.nombre }}
-                    button(class="btn agregar" @click="agregarHechizo(t, indiceL, l, RDE)") AGREGAR
+                    button(class="btn agregar" @click="agregarHechizo(t, indiceL, l)") AGREGAR
                     button(class="btn cancelar" @click="cancelarModal(t)") CANCELAR
 
               .contenedor-entrada-secundaria2(v-if="t.estaAgregado")
@@ -68,6 +72,9 @@ export default {
   components: { AppNuevoHechizo, AppSelectChamp },
   data () {
     return {
+      opcionesGlobales: {
+        destello: false
+      },
       seleccionado: '',
       RDE: [],
       campeonSeleccionado: {
@@ -132,7 +139,7 @@ export default {
         campeonSeleccionado.nombre = ''
       }
     },
-    agregarHechizo (t, indiceL, l, RDE) {
+    agregarHechizo (t, indiceL, l) {
       if (t.id !== '') {
         const auxDOM = this.hechizos[t.id - 1].nombre + t.id + indiceL
         if (!this.existeHechizo(auxDOM, l)) {
@@ -168,12 +175,8 @@ export default {
       dom.play()
       dom.pause()
       if (t.estaPrendido) {
-        if (l.RDE1Activo) {
-          t.RDE += 10
-        }
-        if (l.RDE2Activo) {
-          t.RDE += 5
-        }
+        if (l.RDE1Activo) { t.RDE += 10 }
+        if (l.RDE2Activo) { t.RDE += 5 }
         t.duracion = t.duracion - (t.duracion * t.RDE / 100)
         t.intervalo = setInterval(() => {
           if (t.duracion <= 0) {
@@ -232,6 +235,18 @@ export default {
       } else {
         l.RDE2Activo = !l.RDE2Activo
       }
+    },
+    destelloATodos (listaDeCampeonesSelec) {
+      listaDeCampeonesSelec.forEach((tiempo, indice) => {
+        tiempo.RDE1Activo = false
+        tiempo.RDE2Activo = false
+        this.inicializarValoresTiempo(tiempo.listaDeTiempos[0])
+        tiempo.listaDeTiempos[0].id = 5
+        this.agregarHechizo(tiempo.listaDeTiempos[0], indice, listaDeCampeonesSelec[0])
+      })
+    },
+    habilitarOpciones (opcionesGlobales) {
+      opcionesGlobales.destello = !opcionesGlobales.destello
     }
   },
   filters: {
@@ -247,6 +262,31 @@ export default {
 </script>
 
 <style lang="scss">
+.contenedor-opciones-globales {
+  color: #a6a5a7;
+  background: rgba(0,0,0,.7);
+  padding: 10px 28px;
+  border: 1px solid #f6dea7;
+  width: 100%;
+  max-width: 390px;
+  text-align: center;
+  .titulo{
+    font-size: 1.8em;
+    cursor: pointer;
+  }
+  .btn-agregar-destello{
+    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    .icon-plus{
+      display: inline-block;
+      padding-left: 2%;
+    }
+  }
+}
+
 .contenedor-lista-de-campeones{
   margin: 40px auto;
   .campeon{
@@ -280,12 +320,6 @@ export default {
         min-width: 34px;
         margin: 10% 0;
         cursor: pointer;
-      }
-      .botas{
-
-      }
-      .runas{
-
       }
     }
     .contenedor-lista-de-hechizos{
@@ -504,15 +538,13 @@ export default {
   75% { transform: translateY(25px); }
   100% { transform: translateY(-3000px); }
 }
-
-
 @media (max-width: 335px){
   body{
     font-size: 12.8px;
   }
-  .contenedor-lista-de-campeones{
-    margin: 8% auto;
-  }
+  // .contenedor-lista-de-campeones{
+  //   margin: 8% auto;
+  // }
 }
 
 @media (max-width: 335px){
